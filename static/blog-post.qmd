@@ -1,0 +1,140 @@
+---
+title: "Data Science in 2025: Trends and Tools"
+author: "Gaurav Adlakha"
+date: "2025-04-02"
+categories: [data-science, visualization, machine-learning]
+image: "thumbnail.jpg"
+toc: true
+toc-depth: 3
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    highlight-style: github
+    fig-width: 8
+    fig-height: 6
+---
+
+# Introduction
+
+Welcome to my blog post about data science trends in 2025! In this article, I'll explore some of the latest tools and techniques that are shaping the field today.
+
+## The Data Science Landscape
+
+The data science field continues to evolve rapidly. With advancements in computational power and algorithm development, we're seeing exciting new applications across industries.
+
+# Key Trends in 2025
+
+## 1. Explainable AI
+
+One of the most significant trends has been the shift toward explainable AI systems. No longer are black-box models acceptable in many contexts—stakeholders demand understanding of how models arrive at their conclusions.
+
+```python
+# Example of an explainable model using SHAP values
+import shap
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+
+# Create and train a model
+X = np.random.random((100, 5))
+y = 2*X[:,0] + 3*X[:,1]**2 + np.random.random(100)
+model = RandomForestRegressor().fit(X, y)
+
+# Explain the model's predictions
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+shap.summary_plot(shap_values, X)
+```
+
+## 2. Automated Machine Learning
+
+AutoML tools have matured significantly, making machine learning accessible to non-specialists while helping experts focus on high-value tasks.
+
+## 3. Data Ethics and Responsible AI
+
+With growing awareness of algorithmic bias and privacy concerns, responsible AI practices have become essential.
+
+# Code Example: Interactive Visualization
+
+Let's create an interactive visualization using Quarto's built-in capabilities:
+
+```{python}
+#| label: fig-temperature
+#| fig-cap: "Temperature over time with interactive elements"
+
+import pandas as pd
+import plotly.express as px
+
+# Sample data
+data = pd.DataFrame({
+    'date': pd.date_range(start='2024-01-01', periods=100),
+    'temperature': 20 + 10 * np.sin(np.linspace(0, 4*np.pi, 100)) + np.random.normal(0, 1, 100)
+})
+
+# Create interactive plot
+fig = px.line(data, x='date', y='temperature', 
+              title='Temperature Fluctuations')
+fig.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Temperature (°C)",
+    hovermode="x unified"
+)
+
+fig.show()
+```
+
+# Analysis
+
+The visualization above demonstrates seasonal temperature patterns with random variation. This kind of interactive exploration is characteristic of modern data science workflows.
+
+## Statistical Analysis
+
+We can also perform some statistical analysis on our data:
+
+```{r}
+#| echo: true
+#| warning: false
+
+# R code example
+library(tidyverse)
+
+# Generate similar data in R
+data_r <- tibble(
+  date = seq.Date(from = as.Date("2024-01-01"), 
+                  by = "day", length.out = 100),
+  temperature = 20 + 10 * sin(seq(0, 4*pi, length.out = 100)) + 
+                rnorm(100, 0, 1)
+)
+
+# Fit a simple model
+model <- lm(temperature ~ sin(as.numeric(date)/10) + 
+             cos(as.numeric(date)/10), data = data_r)
+
+# Summarize results
+summary(model)
+
+# Plot with fitted values
+ggplot(data_r, aes(x = date, y = temperature)) +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(y = predict(model)), color = "blue") +
+  theme_minimal() +
+  labs(title = "Temperature with Fitted Seasonal Model",
+       x = "Date", y = "Temperature (°C)")
+```
+
+# Conclusion
+
+The data science field continues to advance rapidly, with emphasis on explainability, automation, and ethical considerations. By staying informed about these trends and mastering the associated tools, practitioners can deliver more value to their organizations and society.
+
+## Next Steps
+
+In upcoming posts, I'll dive deeper into:
+
+1. Edge computing and its impact on ML deployment
+2. New approaches to time series forecasting
+3. Federated learning techniques for privacy-preserving analytics
+
+# References
+
+::: {#refs}
+:::

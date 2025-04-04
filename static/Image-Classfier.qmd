@@ -1,0 +1,142 @@
+---
+title: Image classifier model
+author: "Gaurav Adlakha"
+date: "2025-04-04"
+categories: [fastai,Deep-Learning,Image-classifier]
+description: "Image classifier using fastai"
+image: "thumbnail.jpg"
+toc: true
+toc-depth: 3
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    highlight-style: github
+    fig-width: 8
+    fig-height: 6
+---
+
+
+## Download and Install the dependency
+
+
+```{python}
+   !pip install -Uqq fastai
+   !pip install -Uqq duckduckgo_search
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/}
+!pip install -Uqq duckduckgo_search
+```
+
+# Downloading Images with the DuckDuckGo Search API.
+
+```{python}
+from duckduckgo_search import DDGS #
+from fastcore.all import *
+
+def search_images(keywords, max_images=200): return L(DDGS().images(keywords, max_results=max_images)).itemgot('image')
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 35}
+urls = search_images('biryani photos', max_images=1)
+urls[0]
+```
+
+
+# Download and display a sample biryani image
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 273}
+from fastdownload import download_url
+dest = 'biryani.jpg'
+download_url(urls[0], dest, show_progress=False)
+
+from fastai.vision.all import *
+im = Image.open(dest)
+im.to_thumb(256,256)
+```
+
+# Download and display the sample pulao image
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 161}
+download_url(search_images('pulao photos', max_images=1)[0], 'pulao.jpg', show_progress=False)
+Image.open('pulao.jpg').to_thumb(256,256)
+```
+
+# Download a few sample images and store them in a directory
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/}
+searches = 'biryani','pulao'
+path = Path('biryani_or_pulao')
+from time import sleep
+
+for o in searches:
+    dest = (path/o)
+    dest.mkdir(exist_ok=True, parents=True)
+    download_images(dest, urls=search_images(f'{o} photo'))
+    sleep(10)
+    resize_images(path/o, max_size=400, dest=path/o)
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/}
+Path('biryani_or_pulao').ls()
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/}
+Path('biryani_or_pulao/biryani').ls()
+```
+
+```{python}
+Path('biryani_or_pulao/pulao').ls()
+```
+
+# Using the DuckDuck API, we downloaded a total dataset of 365 food images, consisting of `174` biryani images and `191` pulao images.
+
+# Remove dead link images from the dataset.
+
+```{python}
+failed = verify_images(get_image_files(path))
+failed.map(Path.unlink)
+len(failed)
+```
+
+# Let's create and check our dataset of biryani and pulao images,
+
+```{python}
+dls = DataBlock(
+    blocks=(ImageBlock, CategoryBlock),
+    get_items=get_image_files,
+    description: "Image classifier using fastai"
+    splitter=RandomSplitter(valid_pct=0.2, seed=42),
+    get_y=parent_label,
+    item_tfms=[Resize(192, method='squish')]
+).dataloaders(path)
+
+dls.show_batch(max_n=6)
+```
+
+
+ # Let's train it using the ResNet-18 architecture for 3 epochs
+
+```{python}
+learn = vision_learner(dls, resnet18, metrics=error_rate)
+learn.fine_tune(5)
+```
+
+# Let's begin our predictions.
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 71}
+
+is_biryani,_,probs = learn.predict(PILImage.create('biryani.jpg'))
+print(f"This is a: {is_biryani}.")
+print(f"Probability it's a biryani: {probs[0]:.4f}\nProbability it's a pulao image: {probs[1]:.4f}")
+```
+
