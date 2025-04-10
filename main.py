@@ -229,7 +229,7 @@ app, rt = fast_app(
             font-weight: 500;
         }
 
-        /* TOC hierarchy levels with vertical line */
+        /* TOC hierarchy levels */
         .toc-level-1 { 
             padding-left: 0.25rem;
             position: relative;
@@ -733,12 +733,11 @@ def create_toc(content):
     "Create a table of contents from markdown content"
     headings = []
     for line in content.split('\n'):
-        if line.startswith('#'):
-            level = len(line.split()[0])  # Count the number of # symbols
-            title = ' '.join(line.split()[1:])
+        if line.startswith('## '):  # Only match H2 headings (double #)
+            title = line[3:].strip()  # Remove the ## and space
             # Create a URL-friendly ID from the title
             id = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
-            headings.append((level, title, id))
+            headings.append((2, title, id))
     
     # Create TOC items with proper hierarchy and IDs
     toc_items = []
@@ -755,8 +754,8 @@ def create_toc(content):
     new_content = content
     for _, title, id in headings:
         # Replace the heading with the same heading plus an ID
-        old_heading = f"# {title}"
-        new_heading = f'# <a id="{id}"></a>{title}'
+        old_heading = f"## {title}"
+        new_heading = f'## <a id="{id}"></a>{title}'
         new_content = new_content.replace(old_heading, new_heading, 1)
     
     return Div(
