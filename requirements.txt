@@ -3,3 +3,4 @@ monsterui
 PyYAML
 fastcore
 numpy
+execnb
