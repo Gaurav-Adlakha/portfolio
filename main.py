@@ -183,7 +183,7 @@ def nb_to_markdown(nb_path):
                             md_lines.append(md_markdown)
                         elif 'text/html' in out['data']:
                             html_content = ''.join(out['data']['text/html'])
-                            md_lines.append(f'<div>{html_content}</div>')
+                            md_lines.append(f'<div class="notebook-html-output">{Safe(html_content)}</div>')
             md_lines.append('')
     
     return '\n'.join(md_lines)
@@ -208,26 +208,6 @@ def get_notebook_content(file_path):
     
     md_content = nb_to_markdown(file_path)
     return nb, md_content
-
-# def create_toc(content):
-    "Create a table of contents from markdown content"
-    headings = []
-    for line in content.split('\n'):
-        if line.startswith('#'):
-            level = line.count('#', 0, line.find(' '))
-            title = line[level+1:].strip()
-            id = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
-            headings.append((level, title, id))
-    
-    toc_items = [Li(A(title, href=f"#{id}", cls="toc-link")) for level, title, id in headings]
-    
-    for level, title, id in headings:
-        old_heading = f"{'#' * level} {title}"
-        new_heading = f"{'#' * level} <a id=\"{id}\"></a>{title}"
-        content = content.replace(old_heading, new_heading, 1)
-    
-    return Div(H4("Contents"), Ul(*toc_items, cls="toc-list")), content
-
 
 def create_toc(content):
     "Create a table of contents from markdown content with proper nesting"
