@@ -7,6 +7,7 @@ from execnb.nbio import read_nb
 from execnb.shell import CaptureShell
 from fasthtml.common import *
 from monsterui.all import *
+print("test")
 
 app, rt = fast_app(
     hdrs=(
