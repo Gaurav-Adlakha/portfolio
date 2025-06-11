@@ -4,3 +4,4 @@ PyYAML
 fastcore
 numpy
 execnb
+numpy
