@@ -159,6 +159,8 @@ def nb_to_markdown(nb_path):
         pass
     
     for cell in nb.cells:
+        if cell.source.startswith('#| hide'):
+            continue
         if cell.cell_type == 'markdown' and not cell.source.startswith('---'): #ignore the metadata cell
             md_lines.append(cell.source)
             md_lines.append('')
@@ -214,8 +216,16 @@ def get_notebook_content(file_path):
 def create_toc(content):
     "Create a table of contents from markdown content with proper nesting"
     headings = []
+    in_fence = False
+    
     for line in content.split('\n'):
-        if line.startswith('#'):
+        # Toggle fence state when we see ```
+        if line.startswith('```'):
+            in_fence = not in_fence
+            continue
+        
+        # Only look for headings when NOT inside a fence
+        if not in_fence and line.startswith('#'):
             level = line.count('#', 0, line.find(' '))
             title = line[level+1:].strip()
             id = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
