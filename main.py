@@ -153,15 +153,16 @@ def nb_to_markdown(nb_path):
     nb = read_nb(nb_path)
     
     md_lines = []
-    
-    if nb.cells and nb.cells[0].source.startswith('---'):
-        # md_lines.append(nb.cells[0].source)
-        pass
+    skipped_metadata = False  # Track if we've skipped the first metadata cell
     
     for cell in nb.cells:
         if cell.source.startswith('#| hide'):
             continue
-        if cell.cell_type == 'markdown' and not cell.source.startswith('---'): #ignore the metadata cell
+        # Only skip the FIRST markdown cell that starts with '---' (YAML metadata)
+        if cell.cell_type == 'markdown' and cell.source.startswith('---') and not skipped_metadata:
+            skipped_metadata = True
+            continue
+        if cell.cell_type == 'markdown': #ignore the metadata cell
             md_lines.append(cell.source)
             md_lines.append('')
         elif cell.cell_type == 'code':
@@ -228,7 +229,7 @@ def create_toc(content):
         if not in_fence and line.startswith('#'):
             level = line.count('#', 0, line.find(' '))
             title = line[level+1:].strip()
-            id = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
+            id = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '').replace('"', '').replace(':', '').replace('(', '').replace(')', '')
             headings.append((level, title, id))
     
     # Create nested structure based on heading levels
