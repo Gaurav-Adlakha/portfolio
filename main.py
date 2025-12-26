@@ -12,7 +12,7 @@ print("test")
 
 app, rt = fast_app(
     hdrs=(
-        Theme.violet.headers(mode='light', daisy=True, highlightjs=True),
+        Theme.violet.headers(mode='light', daisy=True, highlightjs=True, katex=True),
         Link(rel="stylesheet", href="/static/styles.css"),
     ),
     live=True
