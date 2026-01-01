@@ -163,7 +163,13 @@ def nb_to_markdown(nb_path):
             skipped_metadata = True
             continue
         if cell.cell_type == 'markdown': #ignore the metadata cell
-            md_lines.append(cell.source)
+            # Fix double-escaped backslashes from some notebook editors (for LaTeX)
+            source = cell.source.replace('\\\\', '\\')
+            # Convert \[...\] to $$...$$ for KaTeX display math
+            source = source.replace('\\[', '$$').replace('\\]', '$$')
+            # Convert \(...\) to $...$ for KaTeX inline math
+            source = source.replace('\\(', '$').replace('\\)', '$')
+            md_lines.append(source)
             md_lines.append('')
         elif cell.cell_type == 'code':
             md_lines.append(f'```python\n{cell.source}\n```')
@@ -174,7 +180,11 @@ def nb_to_markdown(nb_path):
                     if 'text' in out:
                         md_lines.append('```\n' + ''.join(out['text']) + '\n```')
                     elif 'data' in out:
-                        if 'image/png' in out['data']:
+                        # Check for SVG first (graphviz outputs SVG)
+                        if 'image/svg+xml' in out['data']:
+                            svg_data = ''.join(out['data']['image/svg+xml'])
+                            md_lines.append(f'<div class="graphviz-output">{svg_data}</div>')
+                        elif 'image/png' in out['data']:
                             img_data = out['data']['image/png']
                             md_lines.append(f'![](data:image/png;base64,{img_data})')
                         elif 'image/jpeg' in out['data']:
@@ -182,7 +192,9 @@ def nb_to_markdown(nb_path):
                             md_lines.append(f'![](data:image/jpeg;base64,{img_data})')
                         elif 'text/plain' in out['data']:
                             txt = ''.join(out['data']['text/plain'])
-                            md_lines.append('```\n' + txt + '\n```')
+                            # Skip graphviz repr strings like <graphviz.graphs.Digraph at 0x...>
+                            if not txt.strip().startswith('<graphviz.'):
+                                md_lines.append('```\n' + txt + '\n```')
                         elif 'text/markdown' in out['data']:
                             md_markdown = ''.join(out['data']['text/markdown'])
                             md_lines.append(md_markdown)
@@ -209,7 +221,7 @@ def parse_notebook_file(file_path):
 def get_notebook_content(file_path):
     shell = CaptureShell()
     nb = read_nb(file_path)
-    # shell.run_all(nb)  # Uncomment to execute notebook
+    # shell.run_all(nb)  # Uncomment to execute notebook (not recommended for production)
     
     md_content = nb_to_markdown(file_path)
     return nb, md_content
