@@ -10,141 +10,137 @@ from fasthtml.common import *
 from monsterui.all import *
 print("test")
 
+# Font links - Inter (modern, used by Vercel, Linear, etc.) + IBM Plex Mono for code
+font_links = (
+    Link(rel="preconnect", href="https://fonts.googleapis.com"),
+    Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
+    Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"),
+)
+
+# Inline styles to ensure clean look
+clean_styles = Style("""
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #fff; }
+    code, pre { font-family: 'IBM Plex Mono', monospace; }
+    .hero-section, section, main { background: #fff !important; }
+""")
+
 app, rt = fast_app(
     hdrs=(
-        Theme.violet.headers(mode='light', daisy=True, highlightjs=True, katex=True),
+        Theme.slate.headers(mode='light', highlightjs=True, katex=True),
+        *font_links,
+        clean_styles,
         Link(rel="stylesheet", href="/static/styles.css"),
     ),
     live=True
 )
 
 def create_navbar():
-    return NavBar(
-        A("Home", href="/", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        A("About", href="/about", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        A("Blogs", href="/blogs", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        brand=H3("Gaurav Adlakha", cls="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-secondary-color"),
-        cls="uk-navbar-container backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
+    # Brand: small profile pic + name (like reference website)
+    brand = A(
+        Img(src="/static/image/profile.jpg", alt="Gaurav", cls="w-6 h-6 rounded-full object-cover"),
+        Span("Gaurav Adlakha", cls="ml-2"),
+        href="/", cls="flex items-center text-base font-semibold"
+    )
+    # Navigation links
+    nav_links = Div(
+        A("About", href="/about", cls="hover:text-primary transition-colors"),
+        A("Blog", href="/blogs", cls="hover:text-primary transition-colors"),
+        cls="flex items-center space-x-4"
+    )
+    return Nav(
+        Div(brand, nav_links, cls="flex items-center justify-between p-4"),
+        cls="border rounded-lg shadow-sm bg-white max-w-2xl mx-auto mt-4"
     )
 
 def create_improved_hero():
-    return Section(
-        Container(
-            Grid(
-                Div(
-                    H1("Hi, I'm Gaurav", cls="text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-secondary-color"),
-                    P("AI Innovator, Data Scientist & Builder", 
-                      cls="text-xl font-semibold text-accent-color mb-4"),
-                    P("I am passionate about developing intelligent, scalable solutions that address real-world challenges. I thrive at the intersection of technology and problem-solving, transforming complex ideas into impactful applications—one model at a time.", 
-                      cls="mb-8 max-w-lg text-text-secondary"),
-                    Div(
-                        A(DivHStacked(UkIcon("github", height=35), 
-                                    P("GitHub", cls="font-medium hover:text-primary-color transition-colors")), 
-                          cls="text-text-secondary hover:text-primary-color", 
-                          href="https://github.com/Gaurav-Adlakha"),
-                        A(DivHStacked(UkIcon("linkedin", height=35), 
-                                    P("LinkedIn", cls="font-medium hover:text-primary-color transition-colors")), 
-                          cls="text-text-secondary hover:text-primary-color", 
-                          href="https://www.linkedin.com/in/gaurav-adlakha-406b1648/"),
-                        A(DivHStacked(UkIcon("file-text", height=35), 
-                                    P("Resume", cls="font-medium hover:text-primary-color transition-colors")), 
-                          cls="text-text-secondary hover:text-primary-color", 
-                          href="/Resume_gaurav_adlakha.pdf", 
-                          download=True),
-                        cls="flex space-x-10 mt-6"
-                    ),
-                    cls="flex flex-col justify-center"
-                ),
-                Div(
-                    Div(
-                        Img(src="/static/image/profile.jpg", 
-                            cls="rounded-full w-[250px] h-[250px] object-cover shadow-xl border-4 border-primary-color"),
-                        cls="relative"
-                    ),
-                    cls="flex justify-center items-center"
-                ),
-                cols_lg=2,
-                cls="py-20 items-center"
-            )
+    """Clean, professional hero section inspired by reference website"""
+    # Social links (like reference website's footer but in hero)
+    socials = [
+        ("github", "https://github.com/Gaurav-Adlakha"),
+        ("linkedin", "https://www.linkedin.com/in/gaurav-adlakha-406b1648/"),
+        ("file-text", "/Resume_gaurav_adlakha.pdf"),
+    ]
+    social_links = Div(
+        *[A(UkIcon(icon, width=18, height=18), href=url, 
+            cls="hover:text-primary transition-colors", 
+            target="_blank" if not url.startswith("/") else None)
+          for icon, url in socials],
+        cls="flex gap-4 text-muted-foreground mt-4"
+    )
+    
+    return Main(
+        Article(
+            H3("Welcome", cls="text-2xl font-semibold mb-4"),
+            Div(
+                P("Hi, I'm Gaurav — an AI research scientist and builder."),
+                P("I'm passionate about developing intelligent, scalable solutions that address real-world challenges. I thrive at the intersection of technology and problem-solving, transforming complex ideas into impactful applications."),
+                P("Check out my ", A("Blog", href="/blogs", cls="text-primary underline"), " for my latest posts, or learn more ", A("About", href="/about", cls="text-primary underline"), " me."),
+                cls="text-base text-muted-foreground leading-relaxed space-y-4"
+            ),
+            social_links,
         ),
-        cls="hero-section"
+        cls="w-full max-w-2xl mx-auto px-6 py-8"
     )
 
 def create_about():
-    return Section(
-        Container(
-            DivCentered(
-                H2("About Me", 
-                   cls="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-secondary-color", 
-                   id="about"),
-                P("I'm a passionate developer with expertise in AI and machine learning. I love building tools that make a difference.", 
-                  cls="max-w-2xl mb-12 text-lg text-text-secondary"),
-                Grid(
-                    Card(
-                        UkIcon("code", cls="mb-4 text-primary-color w-12 h-12"),
-                        H4("Development", cls="text-xl font-semibold mb-2"),
-                        P("Building web applications with modern frameworks and AI integration",
-                          cls="text-text-secondary"),
-                        cls="p-6 hover:border-primary-color transition-colors"
-                    ),
-                    Card(
-                        UkIcon("brain", cls="mb-4 text-secondary-color w-12 h-12"),
-                        H4("AI Research", cls="text-xl font-semibold mb-2"),
-                        P("Exploring the frontiers of artificial intelligence and machine learning",
-                          cls="text-text-secondary"),
-                        cls="p-6 hover:border-secondary-color transition-colors"
-                    ),
-                    Card(
-                        UkIcon("lightbulb", cls="mb-4 text-accent-color w-12 h-12"),
-                        H4("Problem Solving", cls="text-xl font-semibold mb-2"),
-                        P("Finding elegant solutions to complex problems through innovative approaches",
-                          cls="text-text-secondary"),
-                        cls="p-6 hover:border-accent-color transition-colors"
-                    ),
-                    cols_lg=3,
-                    cls="gap-6"
-                )
+    """Clean, simple About section like reference website"""
+    return Article(
+        H2("About", cls="text-2xl font-semibold mb-4"),
+        Div(
+            P("I'm Gaurav Adlakha — an AI research scientist and builder based in Bangalore."),
+            P("I'm passionate about developing intelligent, scalable solutions that address real-world challenges. I thrive at the intersection of technology and problem-solving, transforming complex ideas into impactful applications."),
+            P("My work focuses on:"),
+            Ul(
+                Li("Building AI-powered applications and tools"),
+                Li("Machine learning research and implementation"),
+                Li("Data science and analytics"),
+                cls="list-disc ml-6 space-y-2"
             ),
-            cls="py-16"
-        ),
-        cls="section-muted"
+            P("Feel free to reach out via ", 
+              A("LinkedIn", href="https://www.linkedin.com/in/gaurav-adlakha-406b1648/", cls="text-primary underline", target="_blank"),
+              " or check out my work on ",
+              A("GitHub", href="https://github.com/Gaurav-Adlakha", cls="text-primary underline", target="_blank"),
+              "."),
+            cls="text-base text-muted-foreground leading-relaxed space-y-4"
+        )
     )
 
 def create_footer():
-    return Div(
-        Container(
-            DivFullySpaced(
-                P("© 2024 Gaurav. All rights reserved.", cls="text-text-secondary"),
-                DivHStacked(
-                    A(UkIcon("github", height=20), 
-                      href="https://github.com/Gaurav-Adlakha",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    A(UkIcon("linkedin", height=20),
-                      href="https://www.linkedin.com/in/gaurav-adlakha-406b1648/",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    A(UkIcon("twitter", height=20),
-                      href="#",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    cls="space-x-6"
-                )
-            ),
-            cls="py-8"
-        ),
-        cls="section-muted border-t border-gray-200 dark:border-gray-800"
+    """Simple, clean footer like reference website"""
+    socials = [
+        ("github", "https://github.com/Gaurav-Adlakha"),
+        ("linkedin", "https://www.linkedin.com/in/gaurav-adlakha-406b1648/"),
+        ("mail", "mailto:contact@example.com"),
+    ]
+    social_links = Div(
+        *[A(UkIcon(icon, width=20, height=20), href=url,
+            cls="hover:text-primary transition-colors",
+            target="_blank" if not url.startswith("mailto") else None)
+          for icon, url in socials],
+        cls="flex justify-center gap-6 text-muted-foreground"
+    )
+    return Footer(
+        Divider(),
+        social_links,
+        cls="w-full max-w-2xl mx-auto px-6 mt-auto mb-6"
     )
 
 def page_layout(title, *content):
+    """Page layout with constrained width (max-w-2xl = 672px) like reference"""
     return Div(
-        create_navbar(),
-        Div(*content, cls="flex-grow"),
-        # *content,
-        create_footer()
+        Div(create_navbar(), cls="w-full max-w-2xl mx-auto px-4 sticky top-0 z-50"),
+        Main(*content, cls="w-full max-w-2xl mx-auto px-6 py-8 space-y-8"),
+        create_footer(),
+        cls="flex flex-col min-h-screen bg-white"
     )
 
 def home():
-    return page_layout(
-        "Home",
-        create_improved_hero()
+    """Home page with clean hero section"""
+    return Div(
+        Div(create_navbar(), cls="w-full max-w-2xl mx-auto px-4 sticky top-0 z-50"),
+        create_improved_hero(),
+        create_footer(),
+        cls="flex flex-col min-h-screen bg-white"
     )
 
 def nb_to_markdown(nb_path):
@@ -278,24 +274,13 @@ def create_toc(content):
         new_heading = f"{'#' * level} <a id=\"{id}\"></a>{title}"
         content = content.replace(old_heading, new_heading, 1)
     
-    # Create the TOC container with mobile and desktop versions
-    desktop_toc = f'''
-    <div class="toc-container sticky-toc desktop-toc">
-        <h4>Contents</h4>
-        {toc_html}
-    </div>
+    # Return just the TOC links (no container - that's handled by the layout)
+    toc_with_header = f'''
+    <h4 class="toc-header">Contents</h4>
+    {toc_html}
     '''
     
-    mobile_toc = f'''
-    <div class="toc-container mobile-toc">
-        <details>
-            <summary><h4>Contents</h4></summary>
-            {toc_html}
-        </details>
-    </div>
-    '''
-    
-    return Safe(desktop_toc + mobile_toc), content
+    return Safe(toc_with_header), content
 
 
 def get_all_metadata():
@@ -304,94 +289,34 @@ def get_all_metadata():
     files = post_filenames.map(parse_notebook_file)
     return [f[0] for f in files]
 
-def create_navbar():
-    return NavBar(
-        A("Home", href="/", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        A("About", href="/about", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        A("Blogs", href="/blogs", cls="text-lg font-medium hover:text-primary-color transition-colors"),
-        brand=H3("Gaurav Adlakha", cls="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-color to-secondary-color"),
-        cls="uk-navbar-container backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
-    )
 
-def create_footer():
-    return Div(
-        Container(
-            DivFullySpaced(
-                P("© 2024 Gaurav. All rights reserved.", cls="text-text-secondary"),
-                DivHStacked(
-                    A(UkIcon("github", height=20), 
-                      href="https://github.com/Gaurav-Adlakha",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    A(UkIcon("linkedin", height=20),
-                      href="https://www.linkedin.com/in/gaurav-adlakha-406b1648/",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    A(UkIcon("twitter", height=20),
-                      href="#",
-                      cls="text-text-secondary hover:text-primary-color transition-colors"),
-                    cls="space-x-6"
-                )
-            ),
-            cls="py-8"
-        ),
-        cls="section-muted border-t border-gray-200 dark:border-gray-800"
-    )
-
-def page_layout(title, *content):
-    return Div(
-        create_navbar(),
-        Div(*content, cls="flex-grow"),
-        create_footer()
-    )
 
 def create_blog_card_from_metadata(meta_dict, blog_id):
+    """Simple, clean blog card like reference website"""
     title = meta_dict.get('title', 'No Title')
-    desc = meta_dict.get('description', 'No Description')
-    author = meta_dict.get('author', 'Unknown Author')
-    date = meta_dict.get('date', 'Unknown Date')
+    desc = meta_dict.get('description', '')
+    date = meta_dict.get('date', '')
     tags = meta_dict.get('categories', [])
-    file_name = meta_dict.get('file_name', 'Unknown File Name')
-    img_id = np.random.randint(1, 20)
-
-    return Card(
-        DivLAligned(
-            A(
-                Img(src=f"https://picsum.photos/800/400?random={img_id}", 
-                    cls="w-full h-64 object-cover rounded-t-lg"),
-                href=posts.to(filename=file_name),
-                cls="block overflow-hidden"
-            ),
-            Div(
-                A(
-                    H3(title, 
-                       cls="text-2xl font-bold mb-3 hover:text-primary-color transition-colors tracking-tight"), 
-                    href=posts.to(filename=file_name)
-                ),
-                P(desc, cls="text-text-secondary text-lg mb-6 leading-relaxed"),
-                Div(
-                    DivHStacked(
-                        UkIcon("user", cls="h-4 w-4 opacity-75"),
-                        Small(author),
-                        cls="text-text-secondary"
-                    ),
-                    Small("·", cls="text-text-secondary mx-3 opacity-50"),
-                    DivHStacked(
-                        UkIcon("calendar", cls="h-4 w-4 opacity-75"),
-                        Small(date),
-                        cls="text-text-secondary"
-                    ),
-                    cls="flex items-center mb-6"
-                ),
-                Div(
-                    *[Label(tag, 
-                           cls="bg-background-light hover:bg-background-card text-text-secondary px-3 py-1 rounded-full text-sm font-medium transition-colors") 
-                      for tag in tags],
-                    cls="flex gap-2 flex-wrap"
-                ),
-                cls="p-8"
-            ),
-            cls="flex flex-col"
-        ),
-        cls="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-background-card border border-border-color rounded-lg"
+    file_name = meta_dict.get('file_name', '')
+    
+    # Tag pills
+    tag_pills = Div(
+        *[Span(tag, cls="text-xs px-2 py-1 rounded border bg-muted") for tag in tags],
+        cls="flex gap-2 flex-wrap"
+    ) if tags else None
+    
+    # Date and tags row
+    meta_row = Div(
+        Span(date, cls="text-sm text-muted-foreground"),
+        tag_pills,
+        cls="flex justify-between items-center"
+    )
+    
+    return Div(
+        A(H3(title, cls="font-medium hover:underline"), href=posts.to(filename=file_name)),
+        P(desc, cls="text-muted-foreground text-sm leading-relaxed mt-1") if desc else None,
+        meta_row,
+        cls="space-y-2 border-b pb-4 mb-4"
     )
 
 def get_all_blog_cards():
@@ -400,22 +325,13 @@ def get_all_blog_cards():
     return L(zip(metadata_list, blog_ids)).starmap(create_blog_card_from_metadata)
 
 def create_blog_list():
+    """Blog list with clean, simple card layout"""
     return page_layout(
         "Blog",
-        Section(
-            Container(
-                H1("Blog", 
-                   cls="text-4xl sm:text-5xl font-bold mb-4 tracking-tight text-center"),
-                P("Thoughts, tutorials, and insights on technology and more", 
-                  cls="text-xl text-text-secondary text-center mb-16 max-w-2xl mx-auto"),
-                Grid(
-                    *get_all_blog_cards(),
-                    cols=1, 
-                    cls="gap-12 max-w-5xl mx-auto"
-                ),
-                cls="py-20 px-4 sm:px-6 lg:px-8"
-            ),
-            cls="bg-background-main"
+        H2("Blog", cls="text-2xl font-semibold mb-4"),
+        Div(
+            *get_all_blog_cards(),
+            cls="space-y-6"
         )
     )
 
@@ -435,63 +351,34 @@ def display_post(filename):
     # Get both TOC and updated content with IDs
     toc, content_with_ids = create_toc(md_content)
     
-    return page_layout(
-        "Blog Post",
-        Section(
-            Container(
+    # Tags
+    tags = meta_dict.get('categories', [])
+    tag_pills = Div(
+        *[Span(tag, cls="text-xs px-2 py-1 rounded border bg-muted") for tag in tags],
+        cls="flex gap-2 flex-wrap"
+    ) if tags else None
+    
+    # Blog post - two column layout with TOC on right
+    return Div(
+        Div(create_navbar(), cls="w-full max-w-5xl mx-auto px-4"),
+        Div(
+            # Left column: Main content
+            Article(
+                H1(meta_dict.get('title', 'Untitled Post')),
                 Div(
-                    Div(
-                        H1(meta_dict.get('title', 'Untitled Post'), 
-                           cls="text-4xl sm:text-5xl font-bold mb-4 tracking-tight w-full"),
-                        P(meta_dict.get('description', ''), 
-                          cls="text-xl text-text-secondary leading-relaxed mb-6 w-full"),
-                        
-                        Div(
-                            DivHStacked(
-                                UkIcon("user", cls="h-4 w-4 opacity-75"),
-                                Small(meta_dict.get('author', 'Unknown Author')), 
-                                cls="text-text-secondary"
-                            ),
-                            Small("·", cls="text-text-secondary mx-3 opacity-50"),
-                            DivHStacked(
-                                UkIcon("calendar", cls="h-4 w-4 opacity-75"),
-                                Small(meta_dict.get('date', '')),
-                                cls="text-text-secondary"
-                            ),
-                            cls="flex items-center mb-6"
-                        ),
-                        
-                        Div(
-                            *[Label(tag, 
-                                   cls="bg-background-light hover:bg-background-card text-text-secondary px-3 py-1 rounded-full text-sm font-medium transition-colors") 
-                              for tag in meta_dict.get('categories', [])],
-                            cls="flex gap-2 flex-wrap mb-12"
-                        ),
-                        
-                        Div(
-                            Safe(render_md(content_with_ids))
-                        ),
-                        
-                        Div(
-                            A(
-                                DivHStacked(
-                                    UkIcon("arrow-left", cls="h-5 w-5"),
-                                    "Back to Blog"
-                                ),
-                                href="/blogs",
-                                cls="inline-flex items-center px-5 py-2.5 rounded-lg bg-background-light text-text-primary hover:text-primary-color transition-all hover:-translate-x-1 font-medium"
-                            ),
-                            cls="mt-16 pt-6 border-t border-border-color"
-                        ),
-                        cls="w-full"
-                    ),
-                    
-                    toc,
-                    cls="blog-content-wrapper"
+                    Span(meta_dict.get('date', ''), style="color:#6b7280; font-size:14px"),
+                    tag_pills,
+                    cls="flex items-center gap-3 mb-6 flex-wrap"
                 ),
+                Div(Safe(render_md(content_with_ids)), cls="prose"),
             ),
-            cls='ml-40'
-        )
+            # Right column: TOC sidebar (sticky)
+            Aside(toc, style="position:sticky; top:2rem; max-height:calc(100vh - 4rem); overflow-y:auto;"),
+            cls="blog-layout",
+            style="display:grid; grid-template-columns: 1fr 200px; gap: 3rem; max-width: 100%; margin: 0 auto; padding: 2rem 4rem; align-items: start;"
+        ),
+        create_footer(),
+        cls="flex flex-col min-h-screen bg-white"
     )
 
 @rt
